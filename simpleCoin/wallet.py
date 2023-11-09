@@ -1,49 +1,47 @@
-"""This is going to be your wallet. Here you can do several things:
-- Generate a new address (public and private key). You are going
-to use this address (public key) to send or receive any transactions. You can
-have as many addresses as you wish, but keep in mind that if you
-lose its credential data, you will not be able to retrieve it.
-
-- Send coins to another address
-- Retrieve the entire blockchain and check your balance
-
-If this is your first time using this script don't forget to generate
-a new address and edit miner config file with it (only if you are
-going to mine).
-
-Timestamp in hashed message. When you send your transaction it will be received
-by several nodes. If any node mine a block, your transaction will get added to the
-blockchain but other nodes still will have it pending. If any node see that your
-transaction with same timestamp was added, they should remove it from the
-node_pending_transactions list to avoid it get processed more than 1 time.
-"""
-
 import requests
 import time
 import base64
 import ecdsa
 import json
 
-
 def wallet():
+    """
+    Start the Simple Coin blockchain wallet application.
+
+    This function provides a command-line interface for interacting
+    with a Simple Coin blockchain, allowing users to generate new
+    wallets, send coins to other wallets, check transactions, or
+    quit the application.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    The wallet application interacts with a local Simple Coin
+    blockchain node running at 'http://localhost:5000'. Ensure that
+    the blockchain node is running and accessible for the wallet
+    to work correctly.
+
+    The application guides the user through different options,
+    such as generating a new wallet, sending coins, and checking
+    transactions, using a simple text-based menu.
+    """
     response = None
     while response not in ["1", "2", "3", "4"]:
         response = input("""What do you want to do?
-        1. Generate new wallet
+        1. Generate a new wallet
         2. Send coins to another wallet
         3. Check transactions
         4. Quit\n""")
     if response == "1":
-        # Generate new wallet
-        print("""=========================================\n
-IMPORTANT: save this credentials or you won't be able to recover your wallet\n
-=========================================\n""")
         generate_ECDSA_keys()
     elif response == "2":
         addr_from = input("From: introduce your wallet address (public key)\n")
         private_key = input("Introduce your private key\n")
         addr_to = input("To: introduce destination wallet address\n")
-        amount = input("Amount: number stating how much do you want to send\n")
+        amount = input("Amount: number stating how much you want to send\n")
         print("=========================================\n\n")
         print("Is everything correct?\n")
         print(F"From: {addr_from}\nPrivate Key: {private_key}\nTo: {addr_to}\nAmount: {amount}\n")
@@ -51,27 +49,49 @@ IMPORTANT: save this credentials or you won't be able to recover your wallet\n
         if response.lower() == "y":
             send_transaction(addr_from, private_key, addr_to, amount)
         elif response.lower() == "n":
-            return wallet()  # return to main menu
-    elif response == "3":  # Will always occur when response == 3.
+            return wallet()  # return to the main menu
+    elif response == "3":
         check_transactions()
-        return wallet()  # return to main menu
+        return wallet()  # return to the main menu
     else:
         quit()
 
-
 def send_transaction(addr_from, private_key, addr_to, amount):
-    """Sends your transaction to different nodes. Once any of the nodes manage
-    to mine a block, your transaction will be added to the blockchain. Despite
-    that, there is a low chance your transaction gets canceled due to other nodes
-    having a longer chain. So make sure your transaction is deep into the chain
-    before claiming it as approved!
     """
-    # For fast debugging REMOVE LATER
-    # private_key="181f2448fa4636315032e15bb9cbc3053e10ed062ab0b2680a37cd8cb51f53f2"
-    # amount="3000"
-    # addr_from="SD5IZAuFixM3PTmkm5ShvLm1tbDNOmVlG7tg6F5r7VHxPNWkNKbzZfa+JdKmfBAIhWs9UKnQLOOL1U+R3WxcsQ=="
-    # addr_to="SD5IZAuFixM3PTmkm5ShvLm1tbDNOmVlG7tg6F5r7VHxPNWkNKbzZfa+JdKmfBAIhWs9UKnQLOOL1U+R3WxcsQ=="
+    Send coins from one wallet to another.
 
+    This function sends a specified amount of coins from one wallet
+    (identified by its public key and private key) to another wallet
+    (identified by its public key).
+
+    Parameters
+    ----------
+    addr_from : str
+        The public key (wallet address) of the sender's wallet.
+    private_key : str
+        The private key of the sender's wallet used for signing
+        the transaction.
+    addr_to : str
+        The public key (wallet address) of the recipient's wallet.
+    amount : str
+        The amount of coins to send to the recipient.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    The function validates the sender's private key, signs the
+    transaction message, and sends the transaction to the
+    blockchain node for processing.
+
+    If the private key is invalid or the transaction fails, an
+    error message is displayed.
+
+    Make sure that the blockchain node is running and accessible
+    for this function to work correctly.
+    """
     if len(private_key) == 64:
         signature, message = sign_ECDSA_msg(private_key)
         url = 'http://localhost:5000/txion'
@@ -81,16 +101,30 @@ def send_transaction(addr_from, private_key, addr_to, amount):
                    "signature": signature.decode(),
                    "message": message}
         headers = {"Content-Type": "application/json"}
-
         res = requests.post(url, json=payload, headers=headers)
         print(res.text)
     else:
         print("Wrong address or key length! Verify and try again.")
 
-
 def check_transactions():
-    """Retrieve the entire blockchain. With this you can check your
-    wallets balance. If the blockchain is to long, it may take some time to load.
+    """
+    Check and display blockchain transactions.
+
+    This function retrieves and displays the list of blockchain
+    transactions from the local blockchain node.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    The function sends a request to the blockchain node running at
+    'http://localhost:5000/blocks' and displays the retrieved
+    transactions in a structured format.
+
+    If a connection error occurs, it prompts the user to ensure
+    that the blockchain node is running in another terminal.
     """
     try:
         res = requests.get('http://localhost:5000/blocks')
@@ -99,50 +133,73 @@ def check_transactions():
     except requests.ConnectionError:
         print('Connection error. Make sure that you have run miner.py in another terminal.')
 
-
 def generate_ECDSA_keys():
-    """This function takes care of creating your private and public (your address) keys.
-    It's very important you don't lose any of them or those wallets will be lost
-    forever. If someone else get access to your private key, you risk losing your coins.
-
-    private_key: str
-    public_ley: base64 (to make it shorter)
     """
-    sk = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1)  # this is your sign (private key)
-    private_key = sk.to_string().hex()  # convert your private key to hex
-    vk = sk.get_verifying_key()  # this is your verification key (public key)
-    public_key = vk.to_string().hex()
-    # we are going to encode the public key to make it shorter
-    public_key = base64.b64encode(bytes.fromhex(public_key))
+    Generate a new wallet with ECDSA key pair.
 
+    This function generates a new wallet by creating a new ECDSA
+    key pair, consisting of a private key and a public key (wallet
+    address). It saves this information to a text file.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    The function uses the `ecdsa` library to generate a new ECDSA
+    key pair. It then prompts the user to provide a name for the
+    new wallet address and saves the private key and wallet address
+    to a text file.
+
+    The private key and wallet address are required for
+    authorizing transactions.
+    """
+    sk = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1)
+    private_key = sk.to_string().hex()
+    vk = sk.get_verifying_key()
+    public_key = vk.to_string().hex()
+    public_key = base64.b64encode(bytes.fromhex(public_key))
     filename = input("Write the name of your new address: ") + ".txt"
     with open(filename, "w") as f:
         f.write(F"Private key: {private_key}\nWallet address / Public key: {public_key.decode()}")
     print(F"Your new address and private key are now in the file {filename}")
 
-
 def sign_ECDSA_msg(private_key):
-    """Sign the message to be sent
-    private_key: must be hex
-
-    return
-    signature: base64 (to make it shorter)
-    message: str
     """
-    # Get timestamp, round it, make it into a string and encode it to bytes
+    Sign a message using an ECDSA private key.
+
+    This function signs a message using an ECDSA private key,
+    producing a digital signature.
+
+    Parameters
+    ----------
+    private_key : str
+        The ECDSA private key used for signing.
+
+    Returns
+    -------
+    signature : bytes
+        The digital signature produced.
+    message : str
+        The message that was signed.
+
+    Notes
+    -----
+    The function takes a private key as input, generates a message
+    based on the current timestamp, signs the message using ECDSA,
+    and returns the digital signature along with the message.
+    """
     message = str(round(time.time()))
     bmessage = message.encode()
     sk = ecdsa.SigningKey.from_string(bytes.fromhex(private_key), curve=ecdsa.SECP256k1)
     signature = base64.b64encode(sk.sign(bmessage))
     return signature, message
 
-
 if __name__ == '__main__':
     print("""       =========================================\n
-        SIMPLE COIN v1.0.0 - BLOCKCHAIN SYSTEM\n
-       =========================================\n\n
-        You can find more help at: https://github.com/cosme12/SimpleCoin\n
-        Make sure you are using the latest version or you may end in
-        a parallel chain.\n\n\n""")
+        ASCII BUCKS v1.0.0 - BLOCKCHAIN SYSTEM\n
+       =========================================\n\n""")
     wallet()
     input("Press ENTER to exit...")
+    
