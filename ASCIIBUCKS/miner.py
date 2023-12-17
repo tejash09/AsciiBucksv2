@@ -3,7 +3,7 @@ import hashlib
 import json
 import requests
 import base64
-from flask import Flask, request
+from flask import Flask, request,render_template
 from multiprocessing import Process, Pipe
 import ecdsa
 
@@ -388,7 +388,9 @@ def welcome_msg():
     print("""       =========================================\n
         ASCII BUCKS v1.0.0 - BLOCKCHAIN SYSTEM\n
        =========================================\n\n\n\n\n""")
-
+@node.route('/')
+def index():
+    return render_template('index.html')
 if __name__ == '__main__':
     welcome_msg()
     pipe_output, pipe_input = Pipe()
@@ -396,3 +398,4 @@ if __name__ == '__main__':
     miner_process.start()
     transactions_process = Process(target=node.run(), args=pipe_input)
     transactions_process.start()
+    

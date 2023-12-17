@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Coin Blockchain</title>
+</head>
+<body>
+    <h1>Simple Coin Blockchain</h1>
+    
+    <div>
+        <h2>Current Balance:</h2>
+        <p id="balance">Loading...</p>
+    </div>
+
+    <div>
+        <h2>Blockchain</h2>
+        <button onclick="getBlockchain()">Get Blockchain</button>
+        <pre id="blockchain">Blockchain will be displayed here</pre>
+    </div>
+
+    <div>
+        <h2>Pending Transactions</h2>
+        <button onclick="getPendingTransactions()">Get Pending Transactions</button>
+        <pre id="pendingTransactions">Pending transactions will be displayed here</pre>
+    </div>
+
+    <script>
+        function getBlockchain() {
+            fetch('/blocks')
+                .then(response => response.json())
+                .then(data => document.getElementById('blockchain').innerText = JSON.stringify(data, null, 2));
+        }
+
+        function getPendingTransactions() {
+            fetch('/txion')
+                .then(response => response.json())
+                .then(data => document.getElementById('pendingTransactions').innerText = JSON.stringify(data, null, 2));
+        }
+
+        function getCurrentBalance() {
+            // You need to implement an endpoint to get the current balance
+            // and update the 'balance' paragraph accordingly.
+        }
+
+        // Fetch initial data when the page loads
+        getBlockchain();
+        getPendingTransactions();
+        getCurrentBalance();
+    </script>
+</body>
+</html>
