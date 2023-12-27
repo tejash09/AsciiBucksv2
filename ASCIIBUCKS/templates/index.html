@@ -3,15 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Coin Blockchain</title>
+    <title>Ascii-Bucks</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        button {
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
 </head>
 <body>
-    <h1>Simple Coin Blockchain</h1>
+    <h1>Ascii-Bucks</h1>
     
-    <div>
-        <h2>Current Balance:</h2>
-        <p id="balance">Loading...</p>
-    </div>
 
     <div>
         <h2>Blockchain</h2>
@@ -38,11 +66,7 @@
                 .then(data => document.getElementById('pendingTransactions').innerText = JSON.stringify(data, null, 2));
         }
 
-        function getCurrentBalance() {
-            // You need to implement an endpoint to get the current balance
-            // and update the 'balance' paragraph accordingly.
-        }
-
+        
         // Fetch initial data when the page loads
         getBlockchain();
         getPendingTransactions();
