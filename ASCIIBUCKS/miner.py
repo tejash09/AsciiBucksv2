@@ -256,13 +256,13 @@ def consensus(blockchain):
         BLOCKCHAIN = longest_chain
         return BLOCKCHAIN
 
-def validate_blockchain(block):
+def validate_blockchain(blockchain):
     """
     Validate a blockchain chain.
 
     Parameters
     ----------
-    block : list
+    blockchain : list
         The blockchain chain to be validated.
 
     Returns
@@ -272,10 +272,55 @@ def validate_blockchain(block):
 
     Notes
     -----
-    This function validates a blockchain chain. It currently
-    returns True without performing detailed validation.
+    This function validates a blockchain chain by checking the
+    integrity of each block, including the index, timestamp, data,
+    previous_hash, and hash values. It also verifies the proof-of-work.
+
+    Returns True if the blockchain chain is valid; otherwise, False.
     """
+    for i in range(1, len(blockchain)):
+        current_block = blockchain[i]
+        previous_block = blockchain[i - 1]
+
+        if current_block.index != previous_block.index + 1:
+            return False
+
+        if current_block.timestamp <= previous_block.timestamp:
+            return False
+
+        if current_block.hash_block() != current_block.hash:
+            return False
+
+        if current_block.previous_hash != previous_block.hash:
+            return False
+
+        if not valid_proof(previous_block.data['proof-of-work'], current_block.data['proof-of-work']):
+            return False
+
     return True
+
+def valid_proof(last_proof, proof):
+    """
+    Validate a new proof-of-work.
+
+    Parameters
+    ----------
+    last_proof : int
+        The proof-of-work value of the previous block.
+    proof : int
+        The new proof-of-work value to be validated.
+
+    Returns
+    -------
+    bool
+        True if the proof is valid; otherwise, False.
+
+    Notes
+    -----
+    This function validates a new proof-of-work value by checking
+    whether it meets specific criteria based on the last_proof value.
+    """
+    return (proof % 7919 == 0) and (proof % last_proof == 0)
 
 @node.route('/blocks', methods=['GET'])
 def get_blocks():
