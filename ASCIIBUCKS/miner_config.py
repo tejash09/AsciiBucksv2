@@ -1,4 +1,4 @@
-MINER_ADDRESS = "q3nf394hjg-random-miner-address-34nf3i4nflkn3oi"
+MINER_ADDRESS = "W4nM/An7aN5eSIEL+3dpPFP7B0lAX8xRMJOec6x36HKrvMSR1QyVbWHff8XrCGsPiuj50/7eGeTNOrvQN70PMw=="
 MINER_NODE_URL = "http://localhost:5000"
 PEER_NODES = []
 

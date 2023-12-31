@@ -371,15 +371,15 @@ def transaction():
     """
     if request.method == 'POST':
         new_txion = request.get_json()
-        if validate_signature(new_txion['from'], new_txion['signature'], new_txion['message']):
-            NODE_PENDING_TRANSACTIONS.append(new_txion)
-            print("New transaction")
-            print("FROM: {0}".format(new_txion['from']))
-            print("TO: {0}".format(new_txion['to']))
-            print("AMOUNT: {0}\n".format(new_txion['amount']))
-            return "Transaction submission successful\n"
-        else:
-            return "Transaction submission failed. Wrong signature\n"
+        #if validate_signature(new_txion['from'], new_txion['signature'], new_txion['message']):
+        NODE_PENDING_TRANSACTIONS.append(new_txion)
+        print("New transaction")
+        print("FROM: {0}".format(new_txion['from']))
+        print("TO: {0}".format(new_txion['to']))
+        print("AMOUNT: {0}\n".format(new_txion['amount']))
+        return "Transaction submission successful\n"
+        #else:
+         #   return "Transaction submission failed. Wrong signature\n"
     elif request.method == 'GET' and request.args.get("update") == MINER_ADDRESS:
         pending = json.dumps(NODE_PENDING_TRANSACTIONS, sort_keys=True)
         NODE_PENDING_TRANSACTIONS[:] = []
