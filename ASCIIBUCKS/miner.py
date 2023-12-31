@@ -353,6 +353,29 @@ def get_blocks():
     chain_to_send = json.dumps(chain_to_send_json, sort_keys=True)
     return chain_to_send
 
+@node.route('/bal', methods=['GET'])
+def get_bal():
+    """
+    Get the blockchain in JSON format.
+
+    Returns
+    -------
+    str
+        The JSON representation of the blockchain.
+
+    Notes
+    -----
+    This route allows other nodes to request the blockchain.
+    It returns the blockchain in JSON format.
+    """
+    if request.args.get("update") == MINER_ADDRESS:
+        global BLOCKCHAIN
+        BLOCKCHAIN = pipe_input.recv()
+
+    latest_block_index = BLOCKCHAIN[-1].index if BLOCKCHAIN else 0
+
+    return json.dumps({"balance": latest_block_index})
+
 @node.route('/txion', methods=['GET', 'POST'])
 def transaction():
     """
