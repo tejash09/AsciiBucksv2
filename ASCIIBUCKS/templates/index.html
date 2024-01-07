@@ -133,7 +133,7 @@
 
         <div id="balance">Loading balance...
             <button onclick="getBalance()">Get Balance</button>
-            <pre id = "balanc"></pre>
+            <div id="balanceBox"></div>
 
         </div>
 
@@ -184,8 +184,8 @@
                 },
                 body: JSON.stringify({
                     from: fromAddress,
-                    signature: privateKey, // You might want to implement signature creation here
-                    message: '',  // You might want to implement message creation here
+                    signature: privateKey, 
+                    message: '',  
                     to: toAddress,
                     amount: amount,
                 }),
@@ -199,7 +199,7 @@
         function getBalance(){
             fetch('/bal')
                 .then(response => response.json())
-                .then(data => document.getElementById('balance').innerText = JSON.stringify(data, null, 2));
+                .then(data => document.getElementById("balanceBox").innerText = data);
         
         }
 

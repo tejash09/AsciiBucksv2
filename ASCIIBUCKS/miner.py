@@ -374,7 +374,7 @@ def get_bal():
 
     latest_block_index = BLOCKCHAIN[-1].index if BLOCKCHAIN else 0
 
-    return json.dumps({"balance": latest_block_index})
+    return str(latest_block_index)
 
 @node.route('/txion', methods=['GET', 'POST'])
 def transaction():
